@@ -1,4 +1,4 @@
-# flutter_notes
+# Notes app that uses Riverpod
 
 A new Flutter project.
 
