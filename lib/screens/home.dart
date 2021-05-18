@@ -1,44 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_notes/models/note.dart';
+import 'package:flutter_notes/data/note_state.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final notesProvider = ChangeNotifierProvider<Note>((ref) {
-  return Note();
-});
+final notesProvider = ChangeNotifierProvider((ref) => NoteState());
 
-class NotesList extends ConsumerWidget {
+class NotesList extends HookWidget {
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final notesWatcher = watch(notesProvider);
-    return Expanded(
-      child: ListView.builder(
-        itemBuilder: (context, int index) {
-          print(notesWatcher.notesList[index]);
-          return Container(
-            margin: EdgeInsets.all(15),
-            padding: EdgeInsets.all(15),
-            height: 150,
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(notesWatcher.notesList[index],
-                    style:
-                    TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-              ],
-            ),
-          );
-        },
-        itemCount: notesWatcher.notesList.length,
-      ),
+  Widget build(BuildContext context) {
+    final NoteState notesList = useProvider(notesProvider);
+    return ListView.builder(
+      itemBuilder: (context, int index) {
+        print(notesList.getNotes[index]);
+        return Container(
+          margin: const EdgeInsets.all(15),
+          padding: const EdgeInsets.all(15),
+          height: 150,
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(notesList.getNotes[index],
+                  style:
+                      TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        );
+      },
+      itemCount: notesList.getNotes.length,
     );
   }
 }
 
-class Home extends StatelessWidget {
+class Home extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final notes = TextEditingController();
@@ -55,13 +53,17 @@ class Home extends StatelessWidget {
             controller: notes,
             decoration: InputDecoration(
               // border: InputBorder.none,
-                hintText: 'Enter note',
-                hintStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey)),
+              hintText: 'Enter note',
+              hintStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey),
+            ),
             style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
           ElevatedButton(
               onPressed: () => context.read(notesProvider).onSave(notes.text),
@@ -72,7 +74,7 @@ class Home extends StatelessWidget {
                     color: Colors.white,
                     backgroundColor: Colors.blue),
               )),
-          NotesList(),
+          Expanded(child: NotesList()),
         ],
       ),
     );
