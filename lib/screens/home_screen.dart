@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_notes/screens/login_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_notes/data/note_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -37,6 +39,7 @@ class NotesList extends HookWidget {
 }
 
 class Home extends HookWidget {
+  final auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     final notes = TextEditingController();
@@ -65,15 +68,32 @@ class Home extends HookWidget {
               color: Colors.black,
             ),
           ),
-          ElevatedButton(
-              onPressed: () => context.read(notesProvider).onSave(notes.text),
-              child: Text(
-                'Save',
-                style: TextStyle(
-                    fontSize: 22,
-                    color: Colors.white,
-                    backgroundColor: Colors.blue),
-              )),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+            ElevatedButton(
+                onPressed: () => context.read(notesProvider).onSave(notes.text),
+                child: Text(
+                  'Save',
+                  style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                      backgroundColor: Colors.blue),
+                )),
+            ElevatedButton(
+                onPressed: () {
+                  auth.signOut();
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
+                },
+                child: Text(
+                  'Log out',
+                  style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                      backgroundColor: Colors.blue),
+                )),
+          ],),
+
           Expanded(child: NotesList()),
         ],
       ),
