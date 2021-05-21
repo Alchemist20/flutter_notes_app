@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_notes/screens/login_screen.dart';
@@ -11,38 +12,43 @@ final notesProvider = ChangeNotifierProvider((ref) => NoteState());
 class NotesList extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final NoteState notesList = useProvider(notesProvider);
-    return ListView.builder(
-      itemBuilder: (context, int index) {
-        print(notesList.getNotes[index]);
-        return Container(
-          margin: const EdgeInsets.all(15),
-          padding: const EdgeInsets.all(15),
-          height: 150,
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(notesList.getNotes[index],
-                  style:
-                      TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        );
-      },
-      itemCount: notesList.getNotes.length,
-    );
+    final ref = FirebaseFirestore.instance.collection('notes');
+    return StreamBuilder(
+        stream: ref.snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.all(15),
+                padding: const EdgeInsets.all(15),
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(snapshot.data.docs[index]['content'],
+                        style: TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              );
+            },
+            itemCount: snapshot.hasData ? snapshot.data.docs.length : 0,
+          );
+        });
   }
 }
 
 class Home extends HookWidget {
   final auth = FirebaseAuth.instance;
+  CollectionReference ref = FirebaseFirestore.instance.collection('notes');
+
   @override
   Widget build(BuildContext context) {
-    final notes = TextEditingController();
+    TextEditingController content = TextEditingController();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -53,7 +59,7 @@ class Home extends HookWidget {
       body: Column(
         children: [
           TextField(
-            controller: notes,
+            controller: content,
             decoration: InputDecoration(
               // border: InputBorder.none,
               hintText: 'Enter note',
@@ -71,29 +77,32 @@ class Home extends HookWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-            ElevatedButton(
-                onPressed: () => context.read(notesProvider).onSave(notes.text),
-                child: Text(
-                  'Save',
-                  style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.white,
-                      backgroundColor: Colors.blue),
-                )),
-            ElevatedButton(
-                onPressed: () {
-                  auth.signOut();
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
-                },
-                child: Text(
-                  'Log out',
-                  style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.white,
-                      backgroundColor: Colors.blue),
-                )),
-          ],),
-
+              ElevatedButton(
+                  onPressed: () {
+                    ref.add({'content': content.text});
+                  },
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.white,
+                        backgroundColor: Colors.blue),
+                  )),
+              ElevatedButton(
+                  onPressed: () {
+                    auth.signOut();
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => LoginScreen()));
+                  },
+                  child: Text(
+                    'Log out',
+                    style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.white,
+                        backgroundColor: Colors.blue),
+                  )),
+            ],
+          ),
           Expanded(child: NotesList()),
         ],
       ),
