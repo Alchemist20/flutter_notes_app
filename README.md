@@ -1,4 +1,4 @@
-# Notes app that uses Riverpod
+# Notes app that uses Firebase Auth and Cloud Firestore
 
 A new Flutter project.
 
