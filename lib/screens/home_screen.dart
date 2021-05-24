@@ -26,13 +26,19 @@ class NotesList extends HookWidget {
                   color: Colors.blue,
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(snapshot.data.docs[index]['content'],
+                child: Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        snapshot.data.docs[index]['content'],
+                        maxLines: 5,
                         style: TextStyle(
-                            fontSize: 20.0, fontWeight: FontWeight.bold)),
-                  ],
+                            fontSize: 20.0, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
