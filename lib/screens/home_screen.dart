@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_notes/data/note_state.dart';
 import 'package:flutter_notes/screens/login_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_notes/data/note_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -17,6 +17,7 @@ class NotesList extends HookWidget {
         stream: ref.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           return ListView.builder(
+            // shrinkWrap: true,
             itemBuilder: (context, index) {
               return Container(
                 margin: const EdgeInsets.all(15),
@@ -50,11 +51,10 @@ class NotesList extends HookWidget {
 
 class Home extends HookWidget {
   final auth = FirebaseAuth.instance;
-  CollectionReference ref = FirebaseFirestore.instance.collection('notes');
+  TextEditingController content = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController content = TextEditingController();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -85,7 +85,7 @@ class Home extends HookWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    ref.add({'content': content.text});
+                    addData();
                   },
                   child: Text(
                     'Save',
@@ -113,5 +113,11 @@ class Home extends HookWidget {
         ],
       ),
     );
+  }
+
+  addData() {
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection('notes');
+    collectionReference.add({'content': content.text});
   }
 }
