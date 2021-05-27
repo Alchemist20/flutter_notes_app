@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final notesProvider = ChangeNotifierProvider((ref) => NoteState());
+final notesProvider = Provider((ref) => NoteState());
 
 class NotesList extends HookWidget {
   @override
@@ -52,9 +52,9 @@ class NotesList extends HookWidget {
 class Home extends HookWidget {
   final auth = FirebaseAuth.instance;
   TextEditingController content = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
+    final noteStateProvider = useProvider(notesProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -85,7 +85,9 @@ class Home extends HookWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    addData();
+                    // context.read(notesProvider).addData(content.text);
+                    noteStateProvider.addData(content.text);
+                    // addData();
                   },
                   child: Text(
                     'Save',
@@ -113,11 +115,5 @@ class Home extends HookWidget {
         ],
       ),
     );
-  }
-
-  addData() {
-    CollectionReference collectionReference =
-        FirebaseFirestore.instance.collection('notes');
-    collectionReference.add({'content': content.text});
   }
 }
