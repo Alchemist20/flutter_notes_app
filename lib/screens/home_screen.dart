@@ -17,12 +17,11 @@ class NotesList extends HookWidget {
         stream: ref.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           return ListView.builder(
-            // shrinkWrap: true,
+            shrinkWrap: true,
             itemBuilder: (context, index) {
               return Container(
                 margin: const EdgeInsets.all(15),
                 padding: const EdgeInsets.all(15),
-                height: 150,
                 decoration: BoxDecoration(
                   color: Colors.blue,
                   borderRadius: BorderRadius.circular(15),
