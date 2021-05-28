@@ -10,10 +10,4 @@ class NoteState {
     FirebaseFirestore.instance.collection('notes');
     collectionReference.add({'content': data});
   }
-  // List<String> _notesList = ['First Note','Second note'];
-  // List<String> get getNotes => _notesList;
-  // void addNote(String note) {
-  //   _notesList.add(note);
-  //   notifyListeners();
-  // }
 }
