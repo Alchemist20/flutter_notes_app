@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_notes/db//firestore_db.dart';
-import 'package:flutter_notes/screens/login_screen.dart';
+import 'package:flutter_notes/providers/providers.dart';
+import 'package:flutter_notes/services//firestore_service.dart';
+import 'package:flutter_notes/screens/login_and_registration_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-final notesProvider = Provider((ref) => NoteState());
 
 class NotesList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final ref = FirebaseFirestore.instance.collection('notes');
+    final firestoreProvider = useProvider(firebaseFirestoreServiceProvider);
     return StreamBuilder(
         stream: ref.snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -31,7 +31,8 @@ class NotesList extends HookWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        snapshot.data.docs[index]['content'],
+                        // snapshot.data.docs[index]['content'],
+                        firestoreProvider.retrieveNotes(index, snapshot),
                         maxLines: 5,
                         style: TextStyle(
                             fontSize: 20.0, fontWeight: FontWeight.bold),
@@ -49,11 +50,12 @@ class NotesList extends HookWidget {
 }
 
 class Home extends HookWidget {
-  final auth = FirebaseAuth.instance;
   TextEditingController content = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    final noteStateProvider = useProvider(notesProvider);
+    final auth = useProvider(authenticationServiceProvider);
+    final firestoreProvider = useProvider(firebaseFirestoreServiceProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -84,9 +86,7 @@ class Home extends HookWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    // context.read(notesProvider).addData(content.text);
-                    noteStateProvider.addData(content.text);
-                    // addData();
+                    firestoreProvider.createNote(content.text);
                   },
                   child: Text(
                     'Save',
@@ -97,9 +97,10 @@ class Home extends HookWidget {
                   )),
               ElevatedButton(
                   onPressed: () {
-                    auth.signOut();
-                    Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => LoginScreen()));
+                    auth.logOut().then((value) {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => LoginScreen()));
+                    });
                   },
                   child: Text(
                     'Log out',
