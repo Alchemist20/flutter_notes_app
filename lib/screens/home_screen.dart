@@ -84,6 +84,7 @@ class Home extends HookWidget {
               ElevatedButton(
                   onPressed: () {
                     firestoreProvider.createNote(content.text);
+                    content.clear();
                   },
                   child: Text(
                     'Save',
